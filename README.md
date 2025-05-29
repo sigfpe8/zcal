@@ -28,7 +28,9 @@ zcal % ./zig-out/bin/zcal -h
 Usage: zcal [options]            ; Print current month
        zcal [options] year       ; Print given year
        zcal [options] month year ; Print given month/year
-options: -h,                     ; Show this help message
+options: -h                      ; Show this help message
          -c                      ; Print year in 4 columns
          -s                      ; Start week on Monday
 ```
+
+Built with Zig 0.14.1
