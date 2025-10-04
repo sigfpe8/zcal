@@ -5,6 +5,10 @@ const Year = ad.Year;
 const Month = ad.Month;
 const Day = ad.Day;
 
+var stderr_buffer: [2048]u8 = undefined;
+var stderr_writer = std.fs.File.stderr().writer(&stderr_buffer);
+const stderr = &stderr_writer.interface;
+
 pub fn main() !void {
     const args = try getArgs();
     if (args.year != 0 and args.month != 0) {
@@ -46,15 +50,14 @@ fn getArgs() !Args {
             // Handle options
             if (std.mem.eql(u8, arg, "-h") or std.mem.eql(u8, arg, "--help")) {
                 printHelp();
-                std.process.exit(0);
             }
             if (std.mem.eql(u8, arg, "-c")) {
                 args.ncols = 4; // Print 4 columns
             } else if (std.mem.eql(u8, arg, "-s")) {
                 args.start = 1; // Start week on Monday
             } else {
-                std.debug.print("Unknown option: {s}\n", .{arg});
-                std.process.exit(1);
+                stderr.print("Unknown option: {s}\n", .{arg}) catch {};
+                printHelp();
             }
             continue;
         }
@@ -63,42 +66,48 @@ fn getArgs() !Args {
         if (list.len == 1) {
             // If only one argument left, it must be a year
             const year = std.fmt.parseInt(Year, arg, 10) catch { 
-                std.debug.print("Invalid year: {s}\n", .{arg});
-                std.process.exit(1);
+                stderr.print("Invalid year: {s}\n", .{arg}) catch {};
+                printHelp();
             };
             args.year = year;
             break;
         } else if (list.len == 2) {
-            // If two arguments left, it must be month and year
+            // If two arguments left, they must be month and year
             const month = std.fmt.parseInt(Month, arg, 10) catch {
-                std.debug.print("Invalid month: {s}\n", .{arg});
-                std.process.exit(1);
+                stderr.print("Invalid month: {s}\n", .{arg}) catch {};
+                printHelp();
             };
+            if (month < 1 or month > 12) {
+                stderr.print("Invalid month: {d}\n", .{month}) catch {};
+                stderr.print("Month must be between 1 and 12.\n", .{}) catch {};
+                printHelp();
+            }
             args.month = month;
             const year = std.fmt.parseInt(Year,list[1], 10) catch {
-                std.debug.print("Invalid year: {s}\n", .{list[1]});
-                std.process.exit(1);
+                stderr.print("Invalid year: {s}\n", .{list[1]}) catch {};
+                printHelp();
             };
             args.year = year;
             break;
         } else {
-            std.debug.print("Too many arguments.\n", .{});
+            stderr.print("Too many arguments.\n", .{}) catch {};
             printHelp();
-            std.process.exit(1);
         }
     }
 
     return args;
 }
 
-fn printHelp() void {
-    std.debug.print("\n", .{});
-    std.debug.print("Usage: zcal [options]            ; Print current month\n", .{});
-    std.debug.print("       zcal [options] year       ; Print given year\n", .{});
-    std.debug.print("       zcal [options] month year ; Print given month/year\n", .{});
-    std.debug.print("options: -h,                     ; Show this help message\n", .{});
-    std.debug.print("         -c                      ; Print year in 4 columns\n", .{});
-    std.debug.print("         -s                      ; Start week on Monday\n", .{});
-    std.debug.print("\n", .{});
+fn printHelp() noreturn {
+    stderr.print("\n", .{}) catch {};
+    stderr.print("Usage: zcal [options]            ; Print current month\n", .{})     catch {};
+    stderr.print("       zcal [options] year       ; Print given year\n", .{})        catch {};
+    stderr.print("       zcal [options] month year ; Print given month/year\n", .{})  catch {};
+    stderr.print("options: -h,                     ; Show this help message\n", .{})  catch {};
+    stderr.print("         -c                      ; Print year in 4 columns\n", .{}) catch {};
+    stderr.print("         -s                      ; Start week on Monday\n", .{})    catch {};
+    stderr.print("\n", .{}) catch {};
+    stderr.flush() catch {};
+    std.process.exit(1);
 }
 
