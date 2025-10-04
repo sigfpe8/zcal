@@ -33,4 +33,4 @@ options: -h                      ; Show this help message
          -s                      ; Start week on Monday
 ```
 
-Built with Zig 0.14.1
+Updated for Zig 0.15.1
