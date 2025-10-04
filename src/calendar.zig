@@ -27,9 +27,9 @@ pub fn printYearCalendar(
     var yearTable: yearCal = undefined;
     var week: [monthLen]u8 = undefined; // 3 chars / day, 7 days per week
 
-    const stdout_file = std.io.getStdOut().writer();
-    var bw = std.io.bufferedWriter(stdout_file);
-    const stdout = bw.writer();
+    var stdout_buffer: [2048]u8 = undefined;
+    var stdout_writer = std.fs.File.stdout().writer(&stdout_buffer);
+    const stdout = &stdout_writer.interface;
 
     for (0..7) |i| {
         // Fill the week with day names
@@ -112,7 +112,7 @@ pub fn printYearCalendar(
             try stdout.print("\n", .{});
         }
     }
-    try bw.flush(); // Don't forget to flush the buffered writer
+    try stdout.flush(); // Don't forget to flush the buffered writer
 }
 
 pub fn printMonthCalendar(
@@ -122,9 +122,9 @@ pub fn printMonthCalendar(
     ) !void {
     var monthTable: monthCal = undefined;
 
-    const stdout_file = std.io.getStdOut().writer();
-    var bw = std.io.bufferedWriter(stdout_file);
-    const stdout = bw.writer();
+    var stdout_buffer: [1024]u8 = undefined;
+    var stdout_writer = std.fs.File.stdout().writer(&stdout_buffer);
+    const stdout = &stdout_writer.interface;
 
     var week: [monthLen]u8 = undefined; // 3 chars / day, 7 days per week
 
@@ -165,7 +165,7 @@ pub fn printMonthCalendar(
     }
     
     try stdout.print("\n", .{});
-    try bw.flush(); // Don't forget to flush the buffered writer
+    try stdout.flush(); // Don't forget to flush the buffered writer
 }
 
 // start: 0 = Sunday, 1 = Monday, ..., 6 = Saturday
