@@ -3,8 +3,9 @@ const ad = @import("astrodate.zig");
 const Year = ad.Year;
 const Month = ad.Month;
 
-// const mem = std.mem;
-// const Allocator = std.mem.Allocator;
+var stdout_buffer: [4096]u8 = undefined;
+var stdout_writer = std.fs.File.stdout().writer(&stdout_buffer);
+const stdout = &stdout_writer.interface;
 
 // A month will be printed in a grid of 4 to 6 rows and 7 columns.
 // A 31-day month starting on the last day of the week will span 6 rows
@@ -26,10 +27,6 @@ pub fn printYearCalendar(
     ) !void {
     var yearTable: yearCal = undefined;
     var week: [monthLen]u8 = undefined; // 3 chars / day, 7 days per week
-
-    var stdout_buffer: [2048]u8 = undefined;
-    var stdout_writer = std.fs.File.stdout().writer(&stdout_buffer);
-    const stdout = &stdout_writer.interface;
 
     for (0..7) |i| {
         // Fill the week with day names
@@ -121,10 +118,6 @@ pub fn printMonthCalendar(
     start: u32,     // Start of the week, 0 = Sunday, 1 = Monday, ..., 6 = Saturday
     ) !void {
     var monthTable: monthCal = undefined;
-
-    var stdout_buffer: [1024]u8 = undefined;
-    var stdout_writer = std.fs.File.stdout().writer(&stdout_buffer);
-    const stdout = &stdout_writer.interface;
 
     var week: [monthLen]u8 = undefined; // 3 chars / day, 7 days per week
 
